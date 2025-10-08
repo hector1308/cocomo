@@ -7,12 +7,14 @@ use App\Models\Calculo;
 
 class CocomoController extends Controller
 {
+    // Mostrar la vista con los cálculos guardados
     public function index()
     {
         $calculos = Calculo::all();
         return view('cocomo', compact('calculos'));
     }
 
+    // Calcular COCOMO y guardar en la base de datos
     public function calcular(Request $request)
     {
         // Validación básica
@@ -33,36 +35,36 @@ class CocomoController extends Controller
             'empotrado' => ['a' => 3.6, 'b' => 1.20],
         ];
 
-        // FACTORES DE COSTO
+        // Factores de costo
         $factores = [
-            // ATRIBUTOS DEL PRODUCTO
             'RELY' => ['Muy Bajo'=>0.75,'Bajo'=>0.88,'Nominal'=>1.00,'Alto'=>1.15,'Muy Alto'=>1.40,'Extra Alto'=>1.00],
             'DATA' => ['Muy Bajo'=>1.00,'Bajo'=>0.94,'Nominal'=>1.00,'Alto'=>1.08,'Muy Alto'=>1.16,'Extra Alto'=>1.00],
             'CPLX' => ['Muy Bajo'=>0.70,'Bajo'=>0.85,'Nominal'=>1.00,'Alto'=>1.15,'Muy Alto'=>1.30,'Extra Alto'=>1.65],
-            // ATRIBUTOS DEL HARDWARE
             'TIME' => ['Muy Bajo'=>1.00,'Bajo'=>1.00,'Nominal'=>1.00,'Alto'=>1.11,'Muy Alto'=>1.30,'Extra Alto'=>1.66],
             'STOR' => ['Muy Bajo'=>1.00,'Bajo'=>1.00,'Nominal'=>1.00,'Alto'=>1.06,'Muy Alto'=>1.21,'Extra Alto'=>1.56],
             'VIRT' => ['Muy Bajo'=>1.00,'Bajo'=>0.87,'Nominal'=>1.00,'Alto'=>1.15,'Muy Alto'=>1.30,'Extra Alto'=>1.00],
             'TURN' => ['Muy Bajo'=>1.00,'Bajo'=>0.87,'Nominal'=>1.00,'Alto'=>1.07,'Muy Alto'=>1.15,'Extra Alto'=>1.00],
-            // ATRIBUTOS DEL PERSONAL
             'ACAP' => ['Muy Bajo'=>1.46,'Bajo'=>1.19,'Nominal'=>1.00,'Alto'=>0.86,'Muy Alto'=>0.71,'Extra Alto'=>1.00],
             'PCAP' => ['Muy Bajo'=>1.42,'Bajo'=>1.17,'Nominal'=>1.00,'Alto'=>0.86,'Muy Alto'=>0.70,'Extra Alto'=>1.00],
             'AEXP' => ['Muy Bajo'=>1.29,'Bajo'=>1.13,'Nominal'=>1.00,'Alto'=>0.91,'Muy Alto'=>0.82,'Extra Alto'=>1.00],
             'VEXP' => ['Muy Bajo'=>1.21,'Bajo'=>1.10,'Nominal'=>1.00,'Alto'=>0.90,'Muy Alto'=>0.80,'Extra Alto'=>1.00],
             'LTEX' => ['Muy Bajo'=>1.14,'Bajo'=>1.07,'Nominal'=>1.00,'Alto'=>0.95,'Muy Alto'=>0.91,'Extra Alto'=>1.00],
-            // ATRIBUTOS DEL PROYECTO
             'MODP' => ['Muy Bajo'=>1.24,'Bajo'=>1.10,'Nominal'=>1.00,'Alto'=>0.91,'Muy Alto'=>0.82,'Extra Alto'=>1.00],
             'TOOL' => ['Muy Bajo'=>1.00,'Bajo'=>0.95,'Nominal'=>1.00,'Alto'=>1.07,'Muy Alto'=>1.15,'Extra Alto'=>1.00],
             'SCED' => ['Muy Bajo'=>1.00,'Bajo'=>1.00,'Nominal'=>1.00,'Alto'=>1.04,'Muy Alto'=>1.10,'Extra Alto'=>1.23],
         ];
 
-        // Capturar los factores enviados por el formulario
-        $factoresInput = $request->except(['_token','kloc','tipo','salario']);
+        // Capturar solo los factores que seleccionó el usuario
+        $factoresInput = array_filter($request->except(['_token','kloc','tipo','salario']), function($valor) {
+            return !empty($valor);
+        });
 
-        // Calcular EAF
+        // Calcular EAF (solo factores seleccionados)
         $eaf = 1.0;
         foreach ($factoresInput as $clave => $nivel) {
-            $eaf *= $factores[$clave][$nivel] ?? 1.0;
+            if (isset($factores[$clave][$nivel])) {
+                $eaf *= $factores[$clave][$nivel];
+            }
         }
 
         $a = $constantes[$tipo]['a'];
@@ -88,9 +90,9 @@ class CocomoController extends Controller
         ]);
 
         return redirect('/')->with('success', 'Cálculo guardado correctamente.');
-
     }
 }
+
 
 
 
