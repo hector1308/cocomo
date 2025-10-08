@@ -1,4 +1,0 @@
-web: bash start.sh
-
-
-
