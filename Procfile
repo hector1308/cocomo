@@ -1,3 +1,4 @@
-web: frankenphp public/index.php
+web: bash start.sh
+
 
 
