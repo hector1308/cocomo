@@ -3,7 +3,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "preDeployCommand": "COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --no-scripts --no-interaction --prefer-dist && php artisan key:generate && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache",
+    "preDeployCommand": "COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --no-scripts --no-interaction --prefer-dist",
+    "postDeployCommand": "php artisan key:generate --ansi || true && php artisan migrate --force || true && php artisan config:cache && php artisan route:cache && php artisan view:cache",
     "startCommand": "php artisan serve --host=0.0.0.0 --port=$PORT"
   }
 }
