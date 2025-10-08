@@ -5,10 +5,10 @@ if [ ! -d "vendor" ]; then
     composer install --optimize-autoloader --no-dev --no-interaction
 fi
 
-# Permisos necesarios
+# Permisos
 chmod -R 775 storage bootstrap/cache
 
-# Servir Laravel con FrankenPHP en el puerto que asigna Railway
+# Servir Laravel con FrankenPHP
 exec frankenphp public/index.php --port=$PORT
 
 
