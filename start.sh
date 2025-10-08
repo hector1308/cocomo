@@ -13,8 +13,10 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Migraciones
+# Migraciones en producción
 php artisan migrate --force
 
-# Iniciar Laravel en el puerto que Railway asigna
-php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# Servir la app con FrankenPHP
+frankenphp public/index.php
+
+
