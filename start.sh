@@ -8,8 +8,9 @@ fi
 # Permisos necesarios
 chmod -R 775 storage bootstrap/cache
 
-# Servir Laravel con PHP Built-in server
-exec php -S 0.0.0.0:$PORT -t public
+# Servir Laravel con FrankenPHP en el puerto que asigna Railway
+exec frankenphp public/index.php --port=$PORT
+
 
 
 
