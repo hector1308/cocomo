@@ -18,11 +18,14 @@ class Calculo extends Model
         'duracion',
         'personas',
         'costo_total',
-        'factores'
+        'factores',
+        'procedimiento', // ✅ agregar aquí
     ];
 
     protected $casts = [
         'factores' => 'array',
+        // 'procedimiento' => 'string', // opcional, Laravel lo maneja como texto
     ];
 }
+
 

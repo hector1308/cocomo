@@ -54,27 +54,52 @@ class CocomoController extends Controller
             'SCED' => ['Muy Bajo'=>1.00,'Bajo'=>1.00,'Nominal'=>1.00,'Alto'=>1.04,'Muy Alto'=>1.10,'Extra Alto'=>1.23],
         ];
 
-        // Capturar solo los factores que seleccionó el usuario
-        $factoresInput = array_filter($request->except(['_token','kloc','tipo','salario']), function($valor) {
-            return !empty($valor);
-        });
+        // Capturar solo los factores seleccionados por el usuario (no vacíos ni guiones)
+        $factoresInput = collect($request->except(['_token', 'kloc', 'tipo', 'salario']))
+            ->filter(function ($valor) {
+                return !in_array($valor, ['-', null, '']);
+            })
+            ->toArray();
 
-        // Calcular EAF (solo factores seleccionados)
+        // Calcular EAF y armar procedimiento de factores
         $eaf = 1.0;
+        $detalleFactores = "";
         foreach ($factoresInput as $clave => $nivel) {
             if (isset($factores[$clave][$nivel])) {
-                $eaf *= $factores[$clave][$nivel];
+                $valor = $factores[$clave][$nivel];
+                $detalleFactores .= "$clave ($nivel) = $valor\n";
+                $eaf *= $valor;
             }
         }
 
         $a = $constantes[$tipo]['a'];
         $b = $constantes[$tipo]['b'];
 
-        // Cálculos COCOMO
+        // Calcular esfuerzo (PM)
         $esfuerzo = $a * pow($kloc, $b) * $eaf;
+
+        // Calcular duración en meses
         $duracion = 2.5 * pow($esfuerzo, 0.38);
+
+        // Calcular número de personas
         $personas = $esfuerzo / $duracion;
+
+        // Calcular costo total
         $costo_total = $personas * $salario * $duracion;
+
+        // Crear procedimiento detallado
+        $procedimiento = "=== Procedimiento COCOMO I ===\n";
+        $procedimiento .= "Tipo de proyecto: $tipo\n";
+        $procedimiento .= "KLOC: $kloc\n";
+        $procedimiento .= "Constantes: a = $a, b = $b\n\n";
+        $procedimiento .= "--- Factores seleccionados ---\n";
+        $procedimiento .= $detalleFactores . "\n";
+        $procedimiento .= "EAF calculado = $eaf\n";
+        $procedimiento .= "\n--- Cálculos ---\n";
+        $procedimiento .= "Esfuerzo (PM) = a * (KLOC ^ b) * EAF = $a * ($kloc ^ $b) * $eaf = $esfuerzo PM\n";
+        $procedimiento .= "Duración (meses) = 2.5 * (PM ^ 0.38) = $duracion\n";
+        $procedimiento .= "Personas = PM / Duración = $personas\n";
+        $procedimiento .= "Costo total = Personas * Salario * Duración = $costo_total\n";
 
         // Guardar en BD
         Calculo::create([
@@ -87,11 +112,23 @@ class CocomoController extends Controller
             'personas' => $personas,
             'costo_total' => $costo_total,
             'factores' => json_encode($factoresInput),
+            'procedimiento' => $procedimiento, // ✅ guardamos el procedimiento
         ]);
 
         return redirect('/')->with('success', 'Cálculo guardado correctamente.');
     }
+
+    public function eliminar($id)
+{
+    $calculo = Calculo::findOrFail($id);
+    $calculo->delete();
+
+    return redirect('/')->with('success', 'Cálculo eliminado correctamente.');
 }
+
+}
+
+
 
 
 
