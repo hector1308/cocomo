@@ -60,8 +60,9 @@
             @endforeach
         </div>
 
-        <div class="col-span-1 md:col-span-2 mt-6">
-            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full" onclick="this.disabled=true; this.form.submit();">Calcular y Guardar</button>
+        <!-- Botón centrado y más pequeño -->
+        <div class="col-span-1 md:col-span-2 mt-6 flex justify-center">
+            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded" onclick="this.disabled=true; this.form.submit();">Calcular y Guardar</button>
         </div>
     </form>
 
@@ -132,6 +133,7 @@ function toggleProcedimiento(id) {
 </script>
 </body>
 </html>
+
 
 
 
