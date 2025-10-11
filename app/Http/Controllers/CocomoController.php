@@ -35,6 +35,13 @@ class CocomoController extends Controller
             'empotrado' => ['a' => 3.6, 'b' => 1.20],
         ];
 
+        // Exponentes TDEV según tipo de proyecto
+        $tdev_exponentes = [
+            'organico' => 0.38,
+            'semiacoplado' => 0.35,
+            'empotrado' => 0.32,
+        ];
+
         // Factores de costo
         $factores = [
             'RELY' => ['Muy Bajo'=>0.75,'Bajo'=>0.88,'Nominal'=>1.00,'Alto'=>1.15,'Muy Alto'=>1.40,'Extra Alto'=>1.00],
@@ -54,7 +61,7 @@ class CocomoController extends Controller
             'SCED' => ['Muy Bajo'=>1.00,'Bajo'=>1.00,'Nominal'=>1.00,'Alto'=>1.04,'Muy Alto'=>1.10,'Extra Alto'=>1.23],
         ];
 
-        // Capturar solo los factores seleccionados por el usuario (no vacíos ni guiones)
+        // Capturar solo los factores seleccionados por el usuario
         $factoresInput = collect($request->except(['_token', 'kloc', 'tipo', 'salario']))
             ->filter(function ($valor) {
                 return !in_array($valor, ['-', null, '']);
@@ -78,8 +85,8 @@ class CocomoController extends Controller
         // Calcular esfuerzo (PM)
         $esfuerzo = $a * pow($kloc, $b) * $eaf;
 
-        // Calcular duración en meses
-        $duracion = 2.5 * pow($esfuerzo, 0.35);
+        // Calcular duración en meses según tipo de proyecto
+        $duracion = 2.5 * pow($esfuerzo, $tdev_exponentes[$tipo]);
 
         // Calcular número de personas
         $personas = $esfuerzo / $duracion;
@@ -97,7 +104,7 @@ class CocomoController extends Controller
         $procedimiento .= "EAF calculado = $eaf\n";
         $procedimiento .= "\n--- Cálculos ---\n";
         $procedimiento .= "Esfuerzo (PM) = a * (KLOC ^ b) * EAF = $a * ($kloc ^ $b) * $eaf = $esfuerzo PM\n";
-        $procedimiento .= "Duración (meses) = 2.5 * (PM ^ 0.35) = $duracion\n";
+        $procedimiento .= "Duración (meses) = 2.5 * (PM ^ ".$tdev_exponentes[$tipo].") = $duracion\n";
         $procedimiento .= "Personas = PM / Duración = $personas\n";
         $procedimiento .= "Costo total = Personas * Salario * Duración = $costo_total\n";
 
@@ -112,21 +119,21 @@ class CocomoController extends Controller
             'personas' => $personas,
             'costo_total' => $costo_total,
             'factores' => json_encode($factoresInput),
-            'procedimiento' => $procedimiento, // ✅ guardamos el procedimiento
+            'procedimiento' => $procedimiento,
         ]);
 
         return redirect('/')->with('success', 'Cálculo guardado correctamente.');
     }
 
     public function eliminar($id)
-{
-    $calculo = Calculo::findOrFail($id);
-    $calculo->delete();
+    {
+        $calculo = Calculo::findOrFail($id);
+        $calculo->delete();
 
-    return redirect('/')->with('success', 'Cálculo eliminado correctamente.');
+        return redirect('/')->with('success', 'Cálculo eliminado correctamente.');
+    }
 }
 
-}
 
 
 
