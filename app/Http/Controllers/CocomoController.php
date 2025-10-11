@@ -79,7 +79,7 @@ class CocomoController extends Controller
         $esfuerzo = $a * pow($kloc, $b) * $eaf;
 
         // Calcular duración en meses
-        $duracion = 2.5 * pow($esfuerzo, 0.38);
+        $duracion = 2.5 * pow($esfuerzo, 0.35);
 
         // Calcular número de personas
         $personas = $esfuerzo / $duracion;
@@ -97,7 +97,7 @@ class CocomoController extends Controller
         $procedimiento .= "EAF calculado = $eaf\n";
         $procedimiento .= "\n--- Cálculos ---\n";
         $procedimiento .= "Esfuerzo (PM) = a * (KLOC ^ b) * EAF = $a * ($kloc ^ $b) * $eaf = $esfuerzo PM\n";
-        $procedimiento .= "Duración (meses) = 2.5 * (PM ^ 0.38) = $duracion\n";
+        $procedimiento .= "Duración (meses) = 2.5 * (PM ^ 0.35) = $duracion\n";
         $procedimiento .= "Personas = PM / Duración = $personas\n";
         $procedimiento .= "Costo total = Personas * Salario * Duración = $costo_total\n";
 
